@@ -14,23 +14,17 @@ import java.util.Set;
 @Table(name = "tb_order")
 public class Order implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    @OneToMany(mappedBy = "id.order")
+    private final Set<OrderItem> items = new HashSet<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
     private Instant moment;
-
     @ManyToOne
     @JoinColumn(name = "client_id")
     private User client;
-
     private Integer orderStatus;
-
-    @OneToMany(mappedBy = "id.order")
-    private final Set<OrderItem> items = new HashSet<>();
-
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
 
@@ -88,6 +82,14 @@ public class Order implements Serializable {
 
     public Set<OrderItem> getItems() {
         return items;
+    }
+
+    public Double getTotal() {
+        double sum = 0;
+        for (OrderItem obj : items) {
+            sum += obj.getSubTotal();
+        }
+        return sum;
     }
 
     @Override
